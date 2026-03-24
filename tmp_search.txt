@@ -1,0 +1,61 @@
+from email import encoders
+
+from datetime import datetime , timedelta
+from zoneinfo import ZoneInfo
+
+
+INTEGRATION_TABLE_NAME = 'ctrl_dataset.integration_layer_tables'
+CORESYSTEM_TABLE_NAME  = 'ctrl_dataset.coresystem_tables'
+
+
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+# Get Riyadh timezone
+riyadh_tz = ZoneInfo("Asia/Riyadh")
+
+end_date = datetime.now(riyadh_tz).date()
+start_date = end_date - timedelta(days=2)
+
+
+
+def get_condition_col(table_name):
+
+
+    if  'tree_integration' in table_name :
+        ctrl_table = INTEGRATION_TABLE_NAME
+    elif   'tree_db' in table_name:
+        ctrl_table = CORESYSTEM_TABLE_NAME
+
+    condition_query = f" select condition_col from  {ctrl_table} where table_name = '{table_name}' limit 1"
+
+    client = bigquery.Client()
+    query_job = client.query(condition_query)
+    row = next(iter(query_job.result()), None)  # get the first row, or None if empty
+
+    # Extract the column value
+    condition_value = row.condition_col if row else None
+
+    return condition_value
+
+
+
+def get_pk_col(table_name):
+
+
+    if  'tree_integration' in table_name :
+        ctrl_table = INTEGRATION_TABLE_NAME
+    elif   'tree_db' in table_name:
+        ctrl_table = CORESYSTEM_TABLE_NAME
+
+    pk_query = f" select pk_col from  {ctrl_table} where table_name = '{table_name}' limit 1"
+
+    client = bigquery.Client()
+    query_job = client.query(pk_query)
+    row = next(iter(query_job.result()), None)  # get the first row, or None if empty
+
+    # Extract the column value
+    pk_value = row.pk_col if row else None
+
+    return pk_value
+
+def get_db_config(db):
